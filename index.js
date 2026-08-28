@@ -128,8 +128,29 @@ function normalizeApiUrl(value) {
     return url;
 }
 
+function getActiveCustomApi() {
+    const context = getContext() || {};
+    const source = String(
+        context.oai_settings?.chat_completion_source
+        || globalThis.oai_settings?.chat_completion_source
+        || document.querySelector('#chat_completion_source')?.value
+        || '',
+    ).toLowerCase();
+    const url = normalizeApiUrl(
+        context.oai_settings?.custom_url
+        || globalThis.oai_settings?.custom_url
+        || document.querySelector('#custom_api_url_text')?.value
+        || '',
+    );
+    return /custom/.test(source) && url ? url : '';
+}
+
+function getEffectiveApiUrl() {
+    return normalizeApiUrl(settings?.apiUrl) || getActiveCustomApi();
+}
+
 function endpointCandidates(path) {
-    const base = normalizeApiUrl(settings?.apiUrl);
+    const base = getEffectiveApiUrl();
     if (!base) return [];
     const hasVersion = /\/v\d+(?:\.\d+)?$/i.test(base);
     const candidates = hasVersion
@@ -248,7 +269,7 @@ async function refreshModels({ silent = false } = {}) {
     lastModelError = null;
     try {
         let response = await requestHostProxy('/api/openai/test-image-connection', {
-            api_url: normalizeApiUrl(settings?.apiUrl),
+            api_url: getEffectiveApiUrl(),
             api_key: String(settings?.apiKey || '').trim(),
         });
         let payload;
@@ -467,21 +488,42 @@ async function analyzeReference() {
         settings.sceneCast ? `The left-panel scene cast setting is authoritative: ${settings.sceneCast}` : '',
     ].filter(Boolean).join('\n');
     try {
-        const response = await requestApi('chat/completions', {
-            method: 'POST',
-            body: JSON.stringify({
+        const messageBody = {
+            model,
+            messages: [{
+                role: 'user',
+                content: [
+                    { type: 'text', text: prompt },
+                    { type: 'image_url', image_url: { url: image, detail: 'high' } },
+                ],
+            }],
+            max_tokens: 1200,
+            temperature: 0.2,
+        };
+        let response = null;
+        const customUrl = getActiveCustomApi();
+        if (customUrl) {
+            response = await requestHostProxy('/api/openai/caption-image', {
+                image,
+                prompt,
+                api: 'custom',
+                server_url: customUrl,
                 model,
-                messages: [{
-                    role: 'user',
-                    content: [
-                        { type: 'text', text: prompt },
-                        { type: 'image_url', image_url: { url: image, detail: 'high' } },
-                    ],
-                }],
-                max_tokens: 1200,
-                temperature: 0.2,
-            }),
-        });
+            });
+            if (!response) {
+                response = await fetch(`${customUrl}/chat/completions`, {
+                    method: 'POST',
+                    headers: { ...apiHeaders(true) },
+                    body: JSON.stringify(messageBody),
+                });
+            }
+        }
+        if (!response) {
+            response = await requestApi('chat/completions', {
+                method: 'POST',
+                body: JSON.stringify(messageBody),
+            });
+        }
         const caption = extractCaption(await response.json());
         settings.referenceCaption = caption || fallbackCaption();
         getElement('tt-gpt-caption').value = settings.referenceCaption;
@@ -604,7 +646,7 @@ async function generateImage(mode) {
         getRoot()?.classList.add('tt-gpt-open');
         return;
     }
-    if (!normalizeApiUrl(settings.apiUrl)) {
+    if (!getEffectiveApiUrl()) {
         notify('warning', '请先填写生图 API 地址。');
         getRoot()?.classList.add('tt-gpt-open');
         return;
@@ -626,7 +668,7 @@ async function generateImage(mode) {
         try {
             response = await requestHostProxy('/api/openai/generate-image', {
                 ...body,
-                api_url: normalizeApiUrl(settings.apiUrl),
+                api_url: getEffectiveApiUrl(),
                 api_key: String(settings.apiKey || '').trim(),
             });
             if (!response) {
@@ -637,7 +679,7 @@ async function generateImage(mode) {
                 delete body.response_format;
                 response = await requestHostProxy('/api/openai/generate-image', {
                     ...body,
-                    api_url: normalizeApiUrl(settings.apiUrl),
+                    api_url: getEffectiveApiUrl(),
                     api_key: String(settings.apiKey || '').trim(),
                 });
                 if (!response) {
@@ -868,7 +910,7 @@ function setupUi(root) {
     syncFormFromSettings();
     loadCachedModels();
     fillModelSelects();
-    if (settings.apiUrl) void refreshModels({ silent: true });
+    if (getEffectiveApiUrl()) void refreshModels({ silent: true });
 }
 
 function mountUi() {
