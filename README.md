@@ -8,4 +8,4 @@
 
 本扩展需要 SillyTavern 服务端提供 `/api/openai/generate-image`、`/api/openai/caption-image` 和 `/api/openai/test-image-connection` 代理接口。对应服务端补丁在仓库的 `mobile-patch-v9` 目录；没有补丁时，扩展会尝试直接访问中转站，但手机 WebView 可能受 CORS 限制。
 
-功能包括角色、场景、最后一段生图按钮，自定义端点和 Key，模型/分辨率/风格选择，参考图分析及可编辑结果。
+功能包括角色、场景、最后一段生图按钮，自定义端点和 Key，模型/分辨率/风格选择，参考图分析及可编辑结果。分析会优先读取 ST 左侧当前选择的“自定义（兼容 OpenAI）”端点。
