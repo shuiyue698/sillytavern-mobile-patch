@@ -1,0 +1,12 @@
+{
+  "display_name": "TauriTavern GPT 生图中转站",
+  "version": "1.0.0",
+  "author": "shuiyue698",
+  "description": "面向 TauriTavern 手机版的 OpenAI 兼容中转站生图扩展。",
+  "js": "index.js",
+  "css": "style.css",
+  "hooks": {
+    "activate": "activate"
+  },
+  "minimum_client_version": "1.0.0"
+}
