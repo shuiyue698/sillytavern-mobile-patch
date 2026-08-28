@@ -15,6 +15,8 @@
     min-width: 30px;
     padding: 0;
     width: 30px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 #leftSendForm > .sd_gen_action > i {
@@ -36,6 +38,7 @@
     max-width: calc(100vw - 16px) !important;
     min-width: 280px !important;
     pointer-events: auto !important;
+    touch-action: pan-y;
 }
 
 .sd_gen_config_panel.open {

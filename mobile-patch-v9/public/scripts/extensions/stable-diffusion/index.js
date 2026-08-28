@@ -5458,11 +5458,23 @@ async function addSDGenButtons() {
         extension_settings.sd.scene_cast_override = String($(this).val());
         saveSettingsDebounced();
     });
-    $('#sd_gen_config_toggle').on('click', () => configPanel.toggleClass('open'));
+    const toggleConfigPanel = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        configPanel.toggleClass('open');
+        $('#sd_gen_config_toggle').attr('aria-expanded', configPanel.hasClass('open') ? 'true' : 'false');
+    };
+    // pointerup works for touch WebViews where the toolbar may suppress click.
+    $('#sd_gen_config_toggle')
+        .attr({ role: 'button', tabindex: '0', 'aria-expanded': 'false' })
+        .on('pointerup.sdImageConfig', toggleConfigPanel)
+        .on('keydown.sdImageConfig', event => {
+            if (event.key === 'Enter' || event.key === ' ') toggleConfigPanel(event);
+        });
 
     $(document).on('click', '.sd_message_gen', (e) => sdMessageButton($(e.currentTarget), { animate: false }));
 
-    $('.sd_gen_action').on('click', function () {
+    $('.sd_gen_action').not('#sd_gen_config_toggle').on('click', function () {
         const trigger = String($(this).data('sdTrigger') || '');
         if (trigger) {
             console.log('doing /sd ' + trigger);
