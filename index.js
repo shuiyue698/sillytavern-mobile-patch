@@ -40,6 +40,7 @@ const STYLES = [
 let hostContext = null;
 let settings = null;
 let modelIds = [];
+let lastModelError = null;
 let activationPromise = null;
 let mountObserver = null;
 let generationBusy = false;
@@ -171,17 +172,44 @@ async function requestApi(path, options = {}) {
 }
 
 function extractModelIds(payload) {
+    // Relays may return data[], models[], data.models[], or result.data[].
     const values = Array.isArray(payload?.data)
         ? payload.data
         : Array.isArray(payload?.models)
             ? payload.models
-            : [];
+            : Array.isArray(payload?.data?.models)
+                ? payload.data.models
+                : Array.isArray(payload?.result?.data)
+                    ? payload.result.data
+                    : [];
     return values
-        .map(item => typeof item === 'string' ? item : item?.id || item?.name)
+        .map(item => typeof item === 'string' ? item : item?.id || item?.name || item?.model)
         .map(item => String(item || '').trim())
         .filter(Boolean)
         .filter((item, index, array) => array.indexOf(item) === index)
         .sort((a, b) => a.localeCompare(b));
+}
+
+async function requestHostProxy(path, body) {
+    // Use an optional same-origin relay to avoid mobile WebView CORS failures.
+    try {
+        const response = await fetch(path, {
+            method: 'POST',
+            headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        if (response.status === 404 || response.status === 405) return null;
+        if (!response.ok) {
+            const error = new Error((await response.text()) || `HTTP ${response.status}`);
+            error.status = response.status;
+            throw error;
+        }
+        return response;
+    } catch (error) {
+        if (error?.status === 404 || error?.status === 405) return null;
+        if (error instanceof TypeError && /failed to fetch/i.test(error.message || '')) return null;
+        throw error;
+    }
 }
 
 function chooseDefaultImageModel(ids) {
@@ -215,10 +243,21 @@ function fillModelSelects() {
 }
 
 async function refreshModels({ silent = false } = {}) {
+    lastModelError = null;
     try {
-        const response = await requestApi('models', { method: 'GET' });
-        const payload = await response.json();
-        modelIds = extractModelIds(payload);
+        let response = await requestHostProxy('/api/openai/test-image-connection', {
+            api_url: normalizeApiUrl(settings?.apiUrl),
+            api_key: String(settings?.apiKey || '').trim(),
+        });
+        let payload;
+        if (response) {
+            payload = await response.json();
+            modelIds = extractModelIds(payload?.models ? { data: payload.models } : payload);
+        } else {
+            response = await requestApi('models', { method: 'GET' });
+            payload = await response.json();
+            modelIds = extractModelIds(payload);
+        }
         try { localStorage.setItem(MODEL_CACHE_KEY, JSON.stringify(modelIds)); } catch { /* best effort */ }
         if (!settings.imageModel) settings.imageModel = chooseDefaultImageModel(modelIds);
         if (!settings.analysisModel) settings.analysisModel = chooseDefaultAnalysisModel(modelIds);
@@ -228,6 +267,7 @@ async function refreshModels({ silent = false } = {}) {
         if (!silent) notify('success', `已读取 ${modelIds.length} 个模型，可以在下拉框选择。`);
         return modelIds;
     } catch (error) {
+        lastModelError = error;
         if (!silent) {
             setApiStatus(`连接失败：${error.message || error}`, 'error');
             notify('error', `读取模型失败：${error.message || error}`);
@@ -249,6 +289,16 @@ async function testConnection() {
     setApiStatus('正在连接…', 'pending');
     try {
         const ids = await refreshModels({ silent: true });
+        if (lastModelError) throw lastModelError;
+        if (!ids.length) {
+            const hasManualModel = String(settings?.imageModel || '').trim() || String(settings?.analysisModel || '').trim();
+            const message = hasManualModel
+                ? '接口已连接；模型列表不可读，将使用手动填写的模型。'
+                : '接口已连接，但未返回模型列表；请在两个模型输入框手动填写模型名。';
+            setApiStatus(message, 'warning');
+            notify('warning', message);
+            return;
+        }
         if (!ids.length) throw new Error('接口已响应，但没有返回模型列表。');
         setApiStatus(`连接成功，发现 ${ids.length} 个模型`, 'success');
         notify('success', `中转站连接成功，已加载 ${ids.length} 个模型。`);
@@ -572,11 +622,25 @@ async function generateImage(mode) {
     try {
         let response;
         try {
-            response = await requestApi('images/generations', { method: 'POST', body: JSON.stringify(body) });
+            response = await requestHostProxy('/api/openai/generate-image', {
+                ...body,
+                api_url: normalizeApiUrl(settings.apiUrl),
+                api_key: String(settings.apiKey || '').trim(),
+            });
+            if (!response) {
+                response = await requestApi('images/generations', { method: 'POST', body: JSON.stringify(body) });
+            }
         } catch (error) {
             if (error.status === 400) {
                 delete body.response_format;
-                response = await requestApi('images/generations', { method: 'POST', body: JSON.stringify(body) });
+                response = await requestHostProxy('/api/openai/generate-image', {
+                    ...body,
+                    api_url: normalizeApiUrl(settings.apiUrl),
+                    api_key: String(settings.apiKey || '').trim(),
+                });
+                if (!response) {
+                    response = await requestApi('images/generations', { method: 'POST', body: JSON.stringify(body) });
+                }
             } else {
                 throw error;
             }
