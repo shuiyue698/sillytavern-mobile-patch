@@ -1,0 +1,10 @@
+{
+  "display_name": "GPT 生图中转站（SillyTavern）",
+  "version": "1.1.0",
+  "author": "shuiyue698",
+  "description": "适用于普通 SillyTavern 手机版的 OpenAI 兼容生图与参考图分析扩展。",
+  "js": "index.js",
+  "css": "style.css",
+  "homePage": "https://github.com/shuiyue698/sillytavern-mobile-patch",
+  "minimum_client_version": "1.0.0"
+}
