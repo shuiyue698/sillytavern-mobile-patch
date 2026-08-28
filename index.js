@@ -199,6 +199,8 @@ async function requestHostProxy(path, body) {
             body: JSON.stringify(body),
         });
         if (response.status === 404 || response.status === 405) return null;
+        const contentType = response.headers?.get?.('content-type') || '';
+        if (/text\/html/i.test(contentType)) return null;
         if (!response.ok) {
             const error = new Error((await response.text()) || `HTTP ${response.status}`);
             error.status = response.status;
