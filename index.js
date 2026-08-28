@@ -305,8 +305,12 @@ async function testConnection() {
         setApiStatus(`连接成功，发现 ${ids.length} 个模型`, 'success');
         notify('success', `中转站连接成功，已加载 ${ids.length} 个模型。`);
     } catch (error) {
-        setApiStatus(`连接失败：${error.message || error}`, 'error');
-        notify('error', `连接测试失败：${error.message || error}`);
+        const raw = String(error?.message || error);
+        const message = /failed to fetch|networkerror|load failed/i.test(raw)
+            ? '手机端被中转站拦截了跨域请求。请开启 CORS，或改用酒馆服务端代理地址。'
+            : `连接失败：${raw}`;
+        setApiStatus(message, 'error');
+        notify('error', message);
     } finally {
         if (button) button.disabled = false;
     }

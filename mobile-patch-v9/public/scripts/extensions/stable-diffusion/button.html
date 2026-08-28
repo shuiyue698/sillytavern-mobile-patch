@@ -1,0 +1,69 @@
+<div id="sd_gen_character" class="sd_gen_action" data-sd-trigger="protagonist" title="生成当前主角">
+    <i class="fa-solid fa-user"></i>
+</div>
+<div id="sd_gen_scene" class="sd_gen_action" data-sd-trigger="scene" title="生成当前场景">
+    <i class="fa-solid fa-mountain-sun"></i>
+</div>
+<div id="sd_gen_last_paragraph" class="sd_gen_action" data-sd-trigger="raw_last" title="使用最后一段话生成图片">
+    <i class="fa-solid fa-paragraph"></i>
+</div>
+<div id="sd_gen_config_toggle" class="sd_gen_action" title="设置主角与场景角色">
+    <i class="fa-solid fa-sliders"></i>
+</div>
+<div id="sd_gen_config_panel" class="sd_gen_config_panel">
+    <div id="sd_gen_config_drag" class="sd_gen_config_header">
+        <strong>生图控制</strong>
+        <button id="sd_gen_generate" type="button" title="使用附加提示词立即生图"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        <button id="sd_gen_minimize" type="button" title="最小化"><i class="fa-solid fa-minus"></i></button>
+    </div>
+    <div id="sd_gen_config_body">
+    <label for="sd_gen_model_override">生图模型</label>
+    <select id="sd_gen_model_override" title="选择 API 返回的生图模型"></select>
+    <label for="sd_gen_api_url">生图 API 地址</label>
+    <input id="sd_gen_api_url" type="url" placeholder="https://api.example.com/v1">
+    <label for="sd_gen_api_key">生图 API Key</label>
+    <input id="sd_gen_api_key" type="password" placeholder="留空使用现有配置" autocomplete="off">
+    <button id="sd_gen_api_test" type="button">测试连接</button>
+    <span id="sd_gen_api_status" class="sd_gen_api_status"></span>
+    <label for="sd_gen_resolution_override">分辨率</label>
+    <select id="sd_gen_resolution_override" title="选择输出分辨率"></select>
+    <label for="sd_gen_source_mode">内容来源</label>
+    <select id="sd_gen_source_mode">
+        <option value="card_text">角色卡 + 当前文字段落</option>
+        <option value="interface_text">只读取当前聊天界面</option>
+    </select>
+    <label for="sd_gen_style">生图风格</label>
+    <select id="sd_gen_style">
+        <option value="">不指定风格</option>
+        <option value="anime">动漫风</option>
+        <option value="二次元 digital illustration">二次元风</option>
+        <option value="cel shading, clean cel-painted colors">赛璐璐风格</option>
+        <option value="realistic photography">写实摄影</option>
+        <option value="cinematic concept art">电影概念艺术</option>
+        <option value="watercolor illustration">水彩插画</option>
+    </select>
+    <label for="sd_gen_manual_prompt">附加提示词</label>
+    <textarea id="sd_gen_manual_prompt" rows="3" placeholder="输入希望固定加入每次生图的内容"></textarea>
+    <hr>
+    <label for="sd_protagonist_override">主角设定</label>
+    <textarea id="sd_protagonist_override" rows="3" placeholder="例如：乐正绫，16岁少女，深棕近黑长发，红色眼睛，炭黑针织衫，高腰裙，黑色薄丝袜"></textarea>
+    <label for="sd_scene_cast_override">场景角色</label>
+    <textarea id="sd_scene_cast_override" rows="2" placeholder="例如：乐正绫与登记员；只写需要出现在场景中的人物"></textarea>
+    <label for="sd_gen_reference">图像参考</label>
+    <div class="sd_gen_reference_row">
+        <div class="sd_gen_reference_image">
+            <input id="sd_gen_reference" type="file" accept="image/png,image/jpeg,image/webp">
+            <img id="sd_gen_reference_preview" alt="参考图预览">
+            <button id="sd_gen_reference_clear" type="button">清除参考</button>
+            <div id="sd_gen_reference_status" class="sd_gen_reference_status"></div>
+        </div>
+        <div class="sd_gen_reference_analysis">
+            <label for="sd_gen_reference_caption">图像分析结果（可编辑）</label>
+            <label for="sd_gen_analysis_model">分析模型</label>
+            <select id="sd_gen_analysis_model"></select>
+            <button id="sd_gen_reference_analyze" type="button">分析参考图</button>
+            <textarea id="sd_gen_reference_caption" rows="8" placeholder="上传参考图后自动生成分析结果"></textarea>
+        </div>
+    </div>
+    </div>
+</div>

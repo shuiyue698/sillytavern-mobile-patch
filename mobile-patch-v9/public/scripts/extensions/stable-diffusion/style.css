@@ -1,0 +1,326 @@
+#sd_dropdown {
+    z-index: 30000;
+    backdrop-filter: blur(var(--SmartThemeBlurStrength));
+}
+
+#leftSendForm > .sd_gen_action {
+    align-items: center;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: inline-flex;
+    flex: 0 0 30px;
+    height: 30px;
+    justify-content: center;
+    margin: 0 2px;
+    min-width: 30px;
+    padding: 0;
+    width: 30px;
+}
+
+#leftSendForm > .sd_gen_action > i {
+    font-size: 14px;
+}
+
+.sd_gen_config_panel {
+    background: var(--SmartThemeBlurTintColor);
+    border: 1px solid var(--SmartThemeBorderColor);
+    top: 70px;
+    box-shadow: 0 8px 24px #0008;
+    display: none;
+    left: 8px;
+    padding: 10px;
+    position: fixed;
+    width: min(320px, calc(100vw - 16px));
+    z-index: 31000;
+    flex: none !important;
+    max-width: calc(100vw - 16px) !important;
+    min-width: 280px !important;
+    pointer-events: auto !important;
+}
+
+.sd_gen_config_panel.open {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sd_gen_config_header {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    cursor: move;
+    user-select: none;
+}
+
+.sd_gen_config_header button {
+    font-size: 14px;
+    height: 28px;
+    min-width: 28px;
+    padding: 0;
+}
+
+.sd_gen_config_header strong {
+    flex: 1;
+    font-size: 15px;
+}
+
+.sd_gen_config_panel.minimized {
+    padding: 6px 10px;
+}
+
+.sd_gen_config_panel.minimized #sd_gen_config_body {
+    display: none;
+}
+
+#sd_gen_reference_preview {
+    display: none;
+    max-height: 140px;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.sd_gen_reference_row {
+    align-items: flex-start;
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.sd_gen_reference_image,
+.sd_gen_reference_analysis {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.sd_gen_reference_image input {
+    max-width: 100%;
+}
+
+.sd_gen_reference_analysis textarea {
+    min-height: 140px;
+}
+
+#sd_gen_reference_analyze {
+    margin: 0 0 5px;
+    padding: 3px 8px;
+}
+
+#sd_gen_reference_clear {
+    display: block;
+    margin-top: 5px;
+    padding: 3px 8px;
+}
+
+#sd_gen_analysis_model {
+    display: block;
+    margin: 0 0 5px;
+    max-width: 100%;
+    width: 100%;
+}
+
+@media (max-width: 520px) {
+    .sd_gen_config_panel {
+        box-sizing: border-box;
+        left: 4px !important;
+        max-height: calc(100dvh - 78px);
+        min-width: 0 !important;
+        overflow-y: auto;
+        padding: 8px;
+        top: 58px !important;
+        width: calc(100vw - 8px) !important;
+    }
+
+    #sd_gen_config_toggle {
+        left: 4px !important;
+        top: 58px !important;
+    }
+
+    .sd_gen_reference_row {
+        flex-direction: column;
+    }
+
+    .sd_gen_reference_preview {
+        max-height: 240px;
+    }
+
+    #sd_gen_reference_preview {
+        max-height: 240px;
+        max-width: min(100%, 240px);
+    }
+
+    .sd_gen_reference_analysis textarea {
+        min-height: 120px;
+    }
+
+    #leftSendForm > .sd_gen_action {
+        flex-basis: 28px;
+        min-width: 28px;
+        width: 28px;
+    }
+
+    #st_web_search {
+        flex: 0 0 28px;
+        margin: 0 2px;
+    }
+
+    #tts_use_gpt_sovits {
+        font-size: 12px;
+        min-height: 34px;
+        padding: 4px 6px;
+    }
+}
+
+.sd_gen_config_panel label {
+    font-size: 13px;
+}
+
+.sd_gen_config_panel textarea {
+    box-sizing: border-box;
+    font-size: 13px;
+    resize: vertical;
+    width: 100%;
+    min-height: 52px;
+    max-width: 100% !important;
+    min-width: 0 !important;
+}
+
+.sd_gen_config_panel input[type="url"],
+.sd_gen_config_panel input[type="password"] {
+    box-sizing: border-box;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+#sd_gen_api_test { margin: 3px 0; padding: 3px 8px; }
+.sd_gen_api_status { font-size: 12px; margin-left: 6px; }
+
+#leftSendForm > .sd_gen_config_panel {
+    top: 70px !important;
+    left: 8px !important;
+    position: fixed !important;
+    width: 320px !important;
+}
+
+#sd_gen_config_toggle {
+    position: fixed !important;
+    top: 70px;
+    left: 8px;
+    z-index: 31001;
+}
+
+.sd_gen_config_panel input {
+    box-sizing: border-box;
+    font-size: 13px;
+    width: 100%;
+    pointer-events: auto !important;
+    user-select: text;
+}
+
+#sd_comfy_open_workflow_editor {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: fit-content;
+}
+
+#sd_comfy_workflow_editor_template {
+    height: 100%;
+}
+
+.sd_comfy_workflow_editor {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.sd_comfy_workflow_editor_content {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: row;
+}
+
+.sd_comfy_workflow_editor_workflow_container {
+    flex: 1 1 auto;
+}
+
+#sd_comfy_workflow_editor_workflow {
+    font-family: monospace;
+}
+
+.sd_comfy_workflow_editor_placeholder_container {
+    flex: 0 0 auto;
+}
+
+.sd_comfy_workflow_editor_placeholder_list {
+    font-size: x-small;
+    list-style: none;
+    margin: 5px 0;
+    padding: 3px 5px;
+    text-align: left;
+}
+
+.sd_comfy_workflow_editor_placeholder_list>li[data-placeholder]:before {
+    content: "✅ ";
+}
+
+.sd_comfy_workflow_editor_placeholder_list>li.sd_comfy_workflow_editor_not_found:before {
+    content: "❌ ";
+}
+
+.sd_comfy_workflow_editor_placeholder_list>li>.notes-link {
+    cursor: help;
+}
+
+.sd_comfy_workflow_editor_placeholder_list input {
+    font-size: inherit;
+    margin: 0;
+}
+.sd_comfy_workflow_editor_custom_remove, #sd_comfy_workflow_editor_placeholder_add {
+    cursor: pointer;
+    font-weight: bold;
+    width: 1em;
+    opacity: 0.5;
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.sd_settings .flex1.checkbox_label input[type="checkbox"] {
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+#sd_dimensions_block {
+    position: relative;
+}
+
+#sd_swap_dimensions {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+}
+
+.sd_gen_reference_status {
+    color: var(--SmartThemeQuoteColor, #aaa);
+    font-size: 0.8em;
+    margin-top: 4px;
+    min-height: 1.2em;
+}
+
+#st_web_search {
+    cursor: pointer;
+    font-size: 1.1em;
+    margin: 0 6px;
+}
+
+#st_web_search:hover {
+    color: var(--SmartThemeQuoteColor, #6ab0ff);
+}
+
+#st_web_search.web-search-enabled {
+    color: #42a5f5;
+    text-shadow: 0 0 5px rgba(66, 165, 245, 0.65);
+}

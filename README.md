@@ -30,3 +30,7 @@
 ## API 约定
 
 生图使用 OpenAI 兼容的 `POST /images/generations`；图像分析使用 `POST /chat/completions` 的视觉消息格式。响应支持 `b64_json` 和 `url` 两种图片返回形式。
+
+## 普通 SillyTavern 手机版补丁
+
+普通 SillyTavern/Luker 服务端补丁位于 [`mobile-patch-v9`](./mobile-patch-v9/)，压缩包为 [`SillyTavern-mobile-patch-v9-custom-analysis.zip`](./mobile-patch-v9/SillyTavern-mobile-patch-v9-custom-analysis.zip)。它会让参考图分析优先使用左侧“自定义（兼容 OpenAI）”端点，并通过酒馆服务端代理避免手机 WebView 的 CORS 限制。
