@@ -18,6 +18,9 @@
     gap: 4px;
     margin: 0 2px;
     vertical-align: middle;
+    position: relative;
+    z-index: 2147483000;
+    pointer-events: auto;
 }
 
 #tt-gpt-image-relay .tt-gpt-action,
