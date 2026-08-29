@@ -2,12 +2,13 @@ const EXTENSION_ID = 'sillytavern-gpt-image-relay';
 const ROOT_ID = 'tt-gpt-image-relay';
 const REFERENCE_STORAGE_KEY = `${EXTENSION_ID}:reference-image`;
 const MODEL_CACHE_KEY = `${EXTENSION_ID}:models`;
+const H3_MODEL_PRESETS = ['minimax-h3', 'gpt-image-2'];
 
 const DEFAULT_SETTINGS = {
     apiUrl: '',
     apiKey: '',
-    imageModel: '',
-    analysisModel: 'gpt-5.6-luna',
+    imageModel: 'gpt-image-2',
+    analysisModel: 'minimax-h3',
     resolution: '1920x1080',
     style: '',
     sourceMode: 'card_text',
@@ -236,14 +237,18 @@ async function requestHostProxy(path, body) {
 }
 
 function chooseDefaultImageModel(ids) {
-    const preferred = ids.find(id => /gpt-image|dall-e|image|flux|sdxl|stable-diffusion/i.test(id));
-    return preferred || ids[0] || '';
+    const available = [...new Set([...(ids || []), ...H3_MODEL_PRESETS])];
+    const preferred = available.find(id => /gpt-image|dall-e|image|flux|sdxl|stable-diffusion/i.test(id));
+    return preferred || available[0] || '';
 }
 
 function chooseDefaultAnalysisModel(ids) {
     const saved = String(settings?.analysisModel || '').trim();
     if (saved) return saved;
-    return ids.find(id => !/gpt-image|dall-e|image|embedding|audio|tts|whisper/i.test(id)) || ids[0] || 'gpt-5.6-luna';
+    const available = [...new Set([...(ids || []), ...H3_MODEL_PRESETS])];
+    return available.find(id => /minimax-h3/i.test(id))
+        || available.find(id => !/gpt-image|dall-e|image|embedding|audio|tts|whisper/i.test(id))
+        || available[0] || 'minimax-h3';
 }
 
 function fillModelSelects() {
@@ -251,7 +256,7 @@ function fillModelSelects() {
     const analysisSelect = getElement('tt-gpt-analysis-model-select');
     const makeOptions = (select, selected, emptyLabel) => {
         if (!select) return;
-        const values = [...modelIds];
+        const values = [...new Set([...H3_MODEL_PRESETS, ...modelIds])];
         if (selected && !values.includes(selected)) values.unshift(selected);
         select.replaceChildren();
         if (!values.length) {
@@ -281,6 +286,7 @@ async function refreshModels({ silent = false } = {}) {
             payload = await response.json();
             modelIds = extractModelIds(payload);
         }
+        modelIds = [...new Set([...H3_MODEL_PRESETS, ...modelIds])];
         try { localStorage.setItem(MODEL_CACHE_KEY, JSON.stringify(modelIds)); } catch { /* best effort */ }
         if (!settings.imageModel) settings.imageModel = chooseDefaultImageModel(modelIds);
         if (!settings.analysisModel) settings.analysisModel = chooseDefaultAnalysisModel(modelIds);
@@ -848,7 +854,7 @@ function buildUi() {
 function setupUi(root) {
     const panel = root.querySelector('.tt-gpt-panel');
     const handle = root.querySelector('[data-drag-handle]');
-    root.addEventListener('click', event => {
+    const dispatchAction = event => {
         const button = event.target.closest('button');
         if (!button || !root.contains(button)) return;
         const action = button.dataset.action;
@@ -871,6 +877,18 @@ function setupUi(root) {
             saveSettings();
             setStatus('参考图和分析结果已清除。', 'success');
         }
+    };
+    let lastPointerAction = 0;
+    // Some mobile ST toolbars suppress bubbled click events. Handle touch
+    // activation during capture, then ignore the synthetic click that follows.
+    root.addEventListener('pointerup', event => {
+        if (!event.target.closest('button')) return;
+        lastPointerAction = Date.now();
+        dispatchAction(event);
+    }, true);
+    root.addEventListener('click', event => {
+        if (Date.now() - lastPointerAction < 500) return;
+        dispatchAction(event);
     });
     root.addEventListener('input', event => {
         const element = event.target.closest('[data-setting]');
